@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "prefer-arrow-callback": ["off"],
+    "func-names": ["off"],
+    "no-unused-expressions": ["off"]
+  },
+  "globals": {
+    "sinon": true,
+    "expect": true
+  }
+}
