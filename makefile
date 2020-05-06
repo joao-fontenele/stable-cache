@@ -6,3 +6,7 @@ build:
 .PHONY: run
 run:
 	docker-compose run --rm app sh
+
+.PHONY: redis
+redis:
+	docker-compose exec redis redis-cli
