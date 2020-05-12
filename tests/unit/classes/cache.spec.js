@@ -2,7 +2,7 @@ const Bluebird = require('bluebird');
 const Cache = require('../../../lib/classes/cache');
 const testUtils = require('../../utils');
 
-describe('Cache modules', function () {
+describe('Cache', function () {
   let cache;
   let sandbox;
   let redis;
