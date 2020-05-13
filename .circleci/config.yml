@@ -17,6 +17,9 @@ jobs:
           paths:
             - ./node_modules
       - run:
+          name: Lint Commits
+          command: npx commitlint-circle
+      - run:
           name: Lint Code
           command: npm run lint
       - run:
