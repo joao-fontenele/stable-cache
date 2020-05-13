@@ -22,6 +22,11 @@ jobs:
       - run:
           name: Run Tests
           command: npm run test
+      - run:
+          name: Run Test Coverage
+          command: npm run coverage
+      - store_artifacts:
+          path: coverage.tar.gz
 
 workflows:
     build-and-test:
