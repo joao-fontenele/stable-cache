@@ -9,10 +9,13 @@
     "ioredis": "^4.16.3"
   },
   "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.20.0",
+    "husky": "^4.2.5",
     "mocha": "^7.1.2",
     "nyc": "^15.0.1",
     "sinon": "^8.1.1",
