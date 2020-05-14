@@ -3,6 +3,7 @@ const Cache = require('../../../lib/classes/cache');
 const testUtils = require('../../utils');
 
 describe('Cache', function () {
+  const serviceName = 'someService';
   let cache;
   let sandbox;
   let redis;
@@ -31,7 +32,7 @@ describe('Cache', function () {
       }),
     };
 
-    cache = new Cache({ redis });
+    cache = new Cache({ redis, options: { name: serviceName } });
   });
 
   afterEach(function () {
@@ -164,6 +165,73 @@ describe('Cache', function () {
 
       expect(redis.set.withArgs('key', 'value', 'PX', 10000)).to.have.been.calledOnce;
       expect(response).to.be.equal('OK');
+    });
+  });
+
+  describe('raw methods', function () {
+    let clock;
+
+    beforeEach(function () {
+      clock = sandbox.useFakeTimers();
+    });
+
+    afterEach(function () {
+      clock.restore();
+    });
+
+    it('rawGet should call rtaEmitter correctly', async function () {
+      sandbox.spy(cache.rta, 'emitCacheOperation');
+      sandbox.spy(cache.rta, 'emitCacheRT');
+      sandbox.spy(cache.rta, 'emitCacheResult');
+
+      const promise = cache.rawGet('string');
+      const result = await promise;
+
+      expect(result).to.be.equal('hello world!');
+
+      expect(cache.rta.emitCacheOperation.withArgs(serviceName, 'get'))
+        .to.have.been.calledOnce;
+
+      expect(cache.rta.emitCacheRT.withArgs(serviceName, 'get', 0))
+        .to.have.been.calledOnce;
+
+      expect(cache.rta.emitCacheResult.withArgs(serviceName, 'get', true))
+        .to.have.been.calledOnce;
+    });
+
+    it('rawSet should call rtaEmitter correctly', async function () {
+      sandbox.spy(cache.rta, 'emitCacheOperation');
+      sandbox.spy(cache.rta, 'emitCacheRT');
+
+      const promise = cache.rawSet('someKey', 'someValue');
+      const result = await promise;
+
+      expect(result).to.be.equal('OK');
+      expect(redis.set.withArgs('someKey', 'someValue'))
+        .to.have.been.calledOnce;
+
+      expect(cache.rta.emitCacheOperation.withArgs(serviceName, 'set'))
+        .to.have.been.calledOnce;
+
+      expect(cache.rta.emitCacheRT.withArgs(serviceName, 'set', 0))
+        .to.have.been.calledOnce;
+    });
+
+    it('rawProduce should call rtaEmitter correctly', async function () {
+      sandbox.spy(cache.rta, 'emitProducerRT');
+      sandbox.spy(cache.rta, 'emitProducerResult');
+
+      const producer = sandbox.stub().resolves('someValue');
+      const promise = cache.rawProduce({ producer });
+      const result = await promise;
+
+      expect(result).to.be.equal('someValue');
+
+      expect(cache.rta.emitProducerResult.withArgs(serviceName, true))
+        .to.have.been.calledOnce;
+
+      expect(cache.rta.emitProducerRT.withArgs(serviceName, 0))
+        .to.have.been.calledOnce;
     });
   });
 });
