@@ -241,4 +241,35 @@ describe('Producer', function () {
       expect(result).to.be.equal('OK');
     });
   });
+
+  describe('execute method', function () {
+    it('should cleanup possible event listeners, after producer is executed', async function () {
+      const rawProducer = sandbox.stub().resolves(true);
+      const producer = new Producer(rawProducer);
+
+      sandbox.spy(producer, 'cleanupListeners');
+      const result = await producer.execute();
+
+      expect(result).to.be.equal(true);
+      expect(producer.cleanupListeners).to.have.been.calledOnce;
+    });
+  });
+
+  describe('cleanupListeners method', function () {
+    it('should call dispose on each listener in this.listeners', async function () {
+      const producer = new Producer(() => true);
+
+      const listeners = [
+        { dispose: sandbox.stub() },
+        { dispose: sandbox.stub() },
+      ];
+      sandbox.stub(producer, 'listeners').value(listeners);
+
+      await producer.execute();
+
+      listeners.forEach((listener) => {
+        expect(listener.dispose).to.have.been.calledOnce;
+      });
+    });
+  });
 });
