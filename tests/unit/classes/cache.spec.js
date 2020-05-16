@@ -12,7 +12,7 @@ describe('Cache', function () {
     sandbox = sinon.createSandbox();
 
     redis = {
-      get: sandbox.stub().callsFake((key) => {
+      get: sandbox.stub().callsFake(async (key) => {
         if (key === 'string') {
           return 'hello world!';
         }
@@ -23,13 +23,14 @@ describe('Cache', function () {
 
         return null;
       }),
-      set: sandbox.stub().callsFake((key) => {
+      set: sandbox.stub().callsFake(async (key) => {
         if (key === 'throw') {
           throw new Error('msg');
         }
 
         return 'OK';
       }),
+      pttl: sandbox.stub().resolves(60000),
     };
 
     cache = new Cache({ redis, options: { name: serviceName } });
@@ -144,6 +145,38 @@ describe('Cache', function () {
       // have enough time to be called
       await Bluebird.delay(5);
       expect(redis.set).to.have.been.calledOnce;
+    });
+
+    it('should perform a cache refresh in background in case the shouldRefreshKey evaluates to truthy', async function () {
+      const shouldRefreshKey = sandbox.stub().returns(true);
+      const producer = sandbox.stub().resolves('hello world!');
+
+      const key = 'string';
+      const ttl = 60000;
+      const options = { producer, shouldRefreshKey, ttl };
+      const result = await cache.get(key, options);
+
+      expect(result).to.be.equal('hello world!');
+
+      expect(producer).to.have.been.calledOnce;
+      expect(shouldRefreshKey.withArgs({ key, ttl: 60000, options }))
+        .to.have.been.calledOnce;
+    });
+
+    it('should not perform a cache refresh in background in case the shouldRefreshKey evaluates to truthy', async function () {
+      const shouldRefreshKey = sandbox.stub().returns(false);
+      const producer = sandbox.stub().resolves('a new hello world!');
+
+      const key = 'string';
+      const ttl = 60000;
+      const options = { producer, shouldRefreshKey, ttl };
+      const result = await cache.get(key, options);
+
+      expect(result).to.be.equal('hello world!');
+
+      expect(producer).to.not.have.been.called;
+      expect(shouldRefreshKey.withArgs({ key, ttl: 60000, options }))
+        .to.have.been.calledOnce;
     });
   });
 
