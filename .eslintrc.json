@@ -6,5 +6,26 @@
   "env": {
     "node": true,
     "mocha": true
-  }
+  },
+  "overrides": [
+    {
+      "files": ["lib/examples/**/*.js"],
+      "rules": {
+        "no-console": ["off"],
+        "import/no-extraneous-dependencies": ["off"]
+      }
+    },
+    {
+      "files": ["tests/**/*.js"],
+      "rules": {
+        "prefer-arrow-callback": ["off"],
+        "func-names": ["off"],
+        "no-unused-expressions": ["off"]
+      },
+      "globals": {
+        "sinon": true,
+        "expect": true
+      }
+    }
+  ]
 }

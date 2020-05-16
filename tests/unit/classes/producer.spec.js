@@ -1,7 +1,7 @@
 const Bluebird = require('bluebird');
-const { SamplingBreaker } = require('cockatiel');
 const Producer = require('../../../lib/classes/producer');
 const testUtils = require('../../utils');
+const CircuitBreakerPolicy = require('../../../lib/classes/policies/circuit-breaker');
 
 describe('Producer', function () {
   let sandbox;
@@ -78,7 +78,7 @@ describe('Producer', function () {
 
       const producer = new Producer(
         rawProducer,
-        { backoff: { maxAttempts: 2, initialDelay: 100, maxDelay: 3000 } },
+        { retry: { maxAttempts: 2, initialDelay: 100, maxDelay: 3000 } },
       );
 
       const delays = [];
@@ -117,7 +117,7 @@ describe('Producer', function () {
 
       const producer = new Producer(
         sandbox.stub(rawProducer),
-        { backoff: { maxAttempts: 3, initialDelay: 100, maxDelay: 3000 } },
+        { retry: { maxAttempts: 3, initialDelay: 100, maxDelay: 3000 } },
       );
 
       // tick the clock, so the backoff delay can kick in
@@ -151,16 +151,16 @@ describe('Producer', function () {
     it('should fail fast when the circuit is open', async function () {
       const rawProducer = sinon.stub().resolves(true);
 
-      const openCircuitAfter = 10000;
-      const circuitBreaker = new SamplingBreaker({
+      const circuitBreakerPolicy = new CircuitBreakerPolicy({
         threshold: 0.2,
         duration: 30000,
+        openAfter: 30000,
       });
 
-      const producer = new Producer(rawProducer, { circuitBreaker, openCircuitAfter });
+      const producer = new Producer(rawProducer, { circuitBreakerPolicy });
 
       // force circuit breaker to open
-      const trigger = producer.policies[0].isolate();
+      const trigger = producer.policies[1].isolate();
 
       const promise = producer.execute();
       await testUtils.expectToThrow(promise);
@@ -171,13 +171,13 @@ describe('Producer', function () {
     it('should work in case the circuit is closed and producer resolves', async function () {
       const rawProducer = sinon.stub().resolves(true);
 
-      const openCircuitAfter = 10000;
-      const circuitBreaker = new SamplingBreaker({
+      const circuitBreakerPolicy = new CircuitBreakerPolicy({
         threshold: 0.2,
         duration: 30000,
+        openAfter: 30000,
       });
 
-      const producer = new Producer(rawProducer, { circuitBreaker, openCircuitAfter });
+      const producer = new Producer(rawProducer, { circuitBreakerPolicy });
 
       const result = await producer.execute();
 
@@ -202,17 +202,17 @@ describe('Producer', function () {
         return true;
       };
 
-      const circuitBreaker = new SamplingBreaker({
-        threshold: 0.5,
-        duration: 15000,
+      const circuitBreakerPolicy = new CircuitBreakerPolicy({
+        threshold: 0.2,
+        duration: 30000,
+        openAfter: 30000,
       });
       const producer = new Producer(
         rawProducer,
         {
-          backoff: { maxAttempts: 4, initialDelay: 10, maxDelay: 90 },
+          retry: { maxAttempts: 4, initialDelay: 10, maxDelay: 90 },
           timeout: 10,
-          circuitBreaker,
-          openCircuitAfter: 50,
+          circuitBreakerPolicy,
         },
       );
 
@@ -239,37 +239,6 @@ describe('Producer', function () {
       const result = await producer.execute();
 
       expect(result).to.be.equal('OK');
-    });
-  });
-
-  describe('execute method', function () {
-    it('should cleanup possible event listeners, after producer is executed', async function () {
-      const rawProducer = sandbox.stub().resolves(true);
-      const producer = new Producer(rawProducer);
-
-      sandbox.spy(producer, 'cleanupListeners');
-      const result = await producer.execute();
-
-      expect(result).to.be.equal(true);
-      expect(producer.cleanupListeners).to.have.been.calledOnce;
-    });
-  });
-
-  describe('cleanupListeners method', function () {
-    it('should call dispose on each listener in this.listeners', async function () {
-      const producer = new Producer(() => true);
-
-      const listeners = [
-        { dispose: sandbox.stub() },
-        { dispose: sandbox.stub() },
-      ];
-      sandbox.stub(producer, 'listeners').value(listeners);
-
-      await producer.execute();
-
-      listeners.forEach((listener) => {
-        expect(listener.dispose).to.have.been.calledOnce;
-      });
     });
   });
 });
