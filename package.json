@@ -34,7 +34,7 @@
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "mocha --recursive --require ./tests/setup.js ./tests/unit",
     "test:e2e": "mocha --recursive --require ./tests/setup.js ./tests/e2e",
-    "lint": "eslint ."
+    "lint": "eslint --max-warnings 0 ."
   },
   "keywords": [],
   "author": "joao-fontenele",
