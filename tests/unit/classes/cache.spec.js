@@ -159,7 +159,7 @@ describe('Cache', function () {
       expect(result).to.be.equal('hello world!');
 
       expect(producer).to.have.been.calledOnce;
-      expect(shouldRefreshKey.withArgs({ key, ttl: 60000, options }))
+      expect(shouldRefreshKey.withArgs(key, 60000, options))
         .to.have.been.calledOnce;
     });
 
@@ -175,7 +175,7 @@ describe('Cache', function () {
       expect(result).to.be.equal('hello world!');
 
       expect(producer).to.not.have.been.called;
-      expect(shouldRefreshKey.withArgs({ key, ttl: 60000, options }))
+      expect(shouldRefreshKey.withArgs(key, 60000, options))
         .to.have.been.calledOnce;
     });
   });
