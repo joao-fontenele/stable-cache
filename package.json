@@ -1,6 +1,6 @@
 {
   "name": "stable-cache",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "A redis cache library, with producer resilience easily configurable",
   "main": "lib/index.js",
   "files": [
