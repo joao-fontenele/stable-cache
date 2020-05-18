@@ -1,7 +1,7 @@
 {
   "all": true,
   "exclude": [
-    "lib/examples/**/*.js"
+    "examples/**/*.js"
   ],
   "include": [
     "lib/**/*.js"
