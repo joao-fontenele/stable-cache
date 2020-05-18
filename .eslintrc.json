@@ -9,7 +9,7 @@
   },
   "overrides": [
     {
-      "files": ["lib/examples/**/*.js"],
+      "files": ["examples/**/*.js"],
       "rules": {
         "no-console": ["off"],
         "import/no-extraneous-dependencies": ["off"]

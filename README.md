@@ -6,6 +6,7 @@
 [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/4a36da1b2ed3bc53f940/test_coverage)](https://codeclimate.com/github/joao-fontenele/stable-cache/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/4a36da1b2ed3bc53f940/maintainability)](https://codeclimate.com/github/joao-fontenele/stable-cache/maintainability)
+[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/stable-cache/community)
 
 This lib makes extensive use of a concept called producer. A producer is the source of truth of a cached value. Producers are only called when needed to set a cache, and are usually not needed when there's a cache hit.
 
