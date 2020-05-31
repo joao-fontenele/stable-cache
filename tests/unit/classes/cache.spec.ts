@@ -1,6 +1,10 @@
-const Bluebird = require('bluebird');
-const { Cache } = require('../../../dist/classes/cache');
-const testUtils = require('../../utils');
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+
+import * as Bluebird from 'bluebird';
+import { Cache } from '../../../lib/classes/cache';
+
+import * as testUtils from '../../utils';
 
 describe('Cache', function () {
   const serviceName = 'someService';

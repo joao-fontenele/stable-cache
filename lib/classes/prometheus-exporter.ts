@@ -1,5 +1,5 @@
-import Prometheus from 'prom-client';
-import { rtaEmitter } from './rta-emitter';
+import * as Prometheus from 'prom-client';
+import { rtaEmitter, RTAEmitter } from './rta-emitter';
 
 /**
  * @typedef PrometheusRTAExporterOptions
@@ -14,15 +14,30 @@ import { rtaEmitter } from './rta-emitter';
  * histogram. Defaults to `Prometheus.exponentialBuckets(0.1, 2, 8)`
  */
 
+export interface PrometheusExporterOptions {
+  prefix?: string,
+  registers?: Prometheus.Registry[],
+  cacheBuckets?: number[],
+  producerBuckets?: number[],
+}
+
 /**
  * This class is used to export RTA metrics from the cache lib to prometheus.
  */
 export class PrometheusExporter {
+  prefix: string;
+  registers: Prometheus.Registry[];
+  cacheBuckets: number[];
+  producerBuckets: number[];
+  rta: RTAEmitter;
+  listeners: any[];
+  metrics: any;
+  isCollectingMetrics: boolean;
   /**
    * @constructor
    * @param {PrometheusRTAExporterOptions} [options={}]
    */
-  constructor(options = {}) {
+  constructor(options: PrometheusExporterOptions = {}) {
     const {
       prefix,
       registers,
@@ -35,7 +50,7 @@ export class PrometheusExporter {
     this.cacheBuckets = cacheBuckets || Prometheus.exponentialBuckets(0.05, 2, 8);
     this.producerBuckets = producerBuckets || Prometheus.exponentialBuckets(0.1, 2, 8);
 
-    this.metrics = PrometheusRTAExporter.initMetrics({
+    this.metrics = PrometheusExporter.initMetrics({
       prefix: this.prefix,
       registers: this.registers,
       cacheBuckets: this.cacheBuckets,
@@ -60,7 +75,7 @@ export class PrometheusExporter {
     cacheBuckets,
     producerBuckets,
   }) {
-    const metrics = {};
+    const metrics: any = {};
 
     metrics.cacheResults = new Prometheus.Counter({
       name: `${prefix}cache_results_count`,
@@ -175,12 +190,12 @@ export class PrometheusExporter {
 
     this.isCollectingMetrics = true;
 
-    this.rta.onCircuitStateChange((...args) => this.collectCircuitStateChanges(...args));
-    this.rta.onCacheResult((...args) => this.collectCacheResults(...args));
-    this.rta.onCacheRT((...args) => this.collectCacheRT(...args));
-    this.rta.onCacheOperation((...args) => this.collectCacheOperations(...args));
-    this.rta.onProducerRT((...args) => this.collectProducerRT(...args));
-    this.rta.onProducerResult((...args) => this.collectProducerResults(...args));
+    this.rta.onCircuitStateChange((args) => this.collectCircuitStateChanges(args));
+    this.rta.onCacheResult((args) => this.collectCacheResults(args));
+    this.rta.onCacheRT((args) => this.collectCacheRT(args));
+    this.rta.onCacheOperation((args) => this.collectCacheOperations(args));
+    this.rta.onProducerRT((args) => this.collectProducerRT(args));
+    this.rta.onProducerResult((args) => this.collectProducerResults(args));
   }
 
   /**

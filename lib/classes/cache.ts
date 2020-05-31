@@ -1,6 +1,7 @@
 import { Producer } from './producer';
-import { CircuitBreakerPolicy } from './policies/circuit-breaker';
-import { rtaEmitter } from './rta-emitter';
+import { CircuitBreakerPolicy, CircuitBreakerOptions } from './policies/circuit-breaker';
+import { RetryOptions } from './policies/retry';
+import { rtaEmitter, RTAEmitter } from './rta-emitter';
 
 /**
  * @typedef {import('./policies/circuit-breaker.js').CircuitBreakerOptions} CircuitBreakerOptions
@@ -65,6 +66,38 @@ import { rtaEmitter } from './rta-emitter';
  * Defaults to never perform retries.
  */
 
+export type shouldRefreshKey = {
+  (string, number, CacheGetOptions): boolean,
+}
+
+export type producer = {
+  (): (Promise<string | null>),
+}
+
+export type CacheSetOptions = {
+  ttl?: number | null ,
+}
+
+export interface CacheGetOptions {
+  producer?: producer | null,
+  ttl?: number | null ,
+  returnEarlyFromCache?: boolean | null,
+  overrideCache?: boolean | null,
+  shouldRefreshKey?: shouldRefreshKey | null,
+  producerTimeout?: number | null,
+  producerRetry?: RetryOptions,
+}
+
+export interface CacheOptions {
+  name?: string | null | undefined,
+  circuitBreaker?: CircuitBreakerOptions | undefined | null,
+}
+
+export interface CacheConfig {
+  redis: any,
+  options?: CacheOptions
+}
+
 /**
  * This is the main class to be used for interfacing producer with a redis cache.
  *
@@ -73,11 +106,16 @@ import { rtaEmitter } from './rta-emitter';
  * sense that failures in a service doesn't affect another working service.
  */
 export class Cache {
+  redis: any;
+  options: CacheOptions;
+  rta: RTAEmitter;
+  circuitBreakerPolicy: CircuitBreakerPolicy;
+
   /**
    * @constructor
    * @param {!CacheConfig} config
    */
-  constructor({ redis, options = {} }) {
+  constructor({ redis, options = {} }: CacheConfig) {
     this.redis = redis;
     this.options = options;
     this.rta = rtaEmitter;
@@ -154,7 +192,7 @@ export class Cache {
    * cache hit, and possible producer call. Or `null` depending on configured
    * call.
    */
-  async get(key, options = {}) {
+  async get(key, options: CacheGetOptions = {}) {
     const {
       producer,
       returnEarlyFromCache,
@@ -193,7 +231,7 @@ export class Cache {
    * before expiring. Defaults to never set ttl.
    * @returns {Promise<string>} - returns string `OK` if successful.
    */
-  async set(key, value, options = {}) {
+  async set(key, value, options: CacheSetOptions = {}) {
     const { ttl } = options;
     const args = [key, value];
 

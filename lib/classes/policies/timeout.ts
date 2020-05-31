@@ -1,4 +1,4 @@
-import { Policy, TimeoutStrategy } from 'cockatiel';
+import { Policy, TimeoutStrategy, IPolicy } from 'cockatiel';
 import { MyPolicy } from './policy';
 
 /**
@@ -9,10 +9,18 @@ import { MyPolicy } from './policy';
  * policy.
  */
 
+export interface TimeoutOptions {
+  timeout?: number,
+  name?: string,
+}
+
 /**
  * Creates and holds a retry policy with exponential backoff
  */
 export class TimeoutPolicy extends MyPolicy {
+  options: TimeoutOptions;
+  policy: IPolicy<any>;
+
   /**
    * @constructor
    * @param {TimeoutOptions} options

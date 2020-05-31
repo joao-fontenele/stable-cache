@@ -1,7 +1,12 @@
-const Bluebird = require('bluebird');
-const { Producer } = require('../../../dist/classes/producer');
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+
+import * as Bluebird from 'bluebird';
+import { CircuitBreakerPolicy as CBPolicy, RetryPolicy } from 'cockatiel';
+import { Producer } from '../../../lib/classes/producer';
+import { CircuitBreakerPolicy } from '../../../lib/classes/policies/circuit-breaker';
+
 const testUtils = require('../../utils');
-const { CircuitBreakerPolicy } = require('../../../dist/classes/policies/circuit-breaker');
 
 describe('Producer', function () {
   let sandbox;
@@ -83,7 +88,7 @@ describe('Producer', function () {
 
       const delays = [];
       // tick the clock, so the backoff delay can kick in
-      const listener = producer.policies[0].onRetry(({ delay }) => {
+      const listener = (producer.policies[0] as RetryPolicy).onRetry(({ delay }) => {
         delays.push(delay);
         clock.tick(delay || 1);
       });
@@ -121,7 +126,7 @@ describe('Producer', function () {
       );
 
       // tick the clock, so the backoff delay can kick in
-      const listener = producer.policies[0].onRetry(({ delay }) => {
+      const listener = (producer.policies[0] as RetryPolicy).onRetry(({ delay }) => {
         clock.tick(delay || 1);
       });
 
@@ -160,7 +165,7 @@ describe('Producer', function () {
       const producer = new Producer(rawProducer, { circuitBreakerPolicy });
 
       // force circuit breaker to open
-      const trigger = producer.policies[1].isolate();
+      const trigger = (producer.policies[1] as CBPolicy).isolate();
 
       const promise = producer.execute();
       await testUtils.expectToThrow(promise);

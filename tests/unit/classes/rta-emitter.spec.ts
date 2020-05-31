@@ -1,4 +1,7 @@
-const RTAEmitter = require('../../../dist/classes/rta-emitter');
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+
+import * as RTAEmitter from '../../../lib/classes/rta-emitter';
 
 describe('RTAEmitter', function () {
   const { rtaEmitter } = RTAEmitter;

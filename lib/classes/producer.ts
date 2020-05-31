@@ -1,8 +1,17 @@
-import { Policy } from 'cockatiel';
+import { Policy, IPolicy } from 'cockatiel';
 import { TimeoutPolicy } from './policies/timeout';
 import { RetryPolicy } from './policies/retry';
 
+export type producer = {
+  (): (Promise<string | null>),
+}
+
 export class Producer {
+  options: any;
+  producer: producer;
+  listeners: Array<any>;
+  policies: Array<IPolicy<any>>
+
   constructor(producer, options = {}) {
     this.options = options;
     this.producer = producer;

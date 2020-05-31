@@ -1,4 +1,4 @@
-import { Policy, decorrelatedJitterGenerator } from 'cockatiel';
+import { Policy, decorrelatedJitterGenerator, GeneratorFn, IPolicy } from 'cockatiel';
 import { MyPolicy } from './policy';
 
 /**
@@ -17,10 +17,22 @@ import { MyPolicy } from './policy';
  * policy.
  */
 
+export interface RetryOptions {
+  maxDelay: number | null,
+  maxAttempts: number | null,
+  exponent: number | null,
+  initialDelay: number | null,
+  generator: GeneratorFn<any>,
+  name: string | null,
+}
+
 /**
  * Creates and holds a retry policy with exponential backoff
  */
 export class RetryPolicy extends MyPolicy {
+  policy: IPolicy<any>;
+  defaultOptions: RetryOptions;
+
   /**
    * @constructor
    * @param {RetryOptions} options

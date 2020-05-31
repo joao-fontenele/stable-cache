@@ -1,6 +1,6 @@
-import { Policy, SamplingBreaker } from 'cockatiel';
+import { Policy, SamplingBreaker, IPolicy, IBreaker, CircuitBreakerPolicy as CBPolicy } from 'cockatiel';
 import { MyPolicy } from './policy';
-import { rtaEmitter } from '../rta-emitter';
+import { rtaEmitter, RTAEmitter } from '../rta-emitter';
 
 /**
  * @typedef {Object} CircuitBreakerOptions
@@ -17,23 +17,37 @@ import { rtaEmitter } from '../rta-emitter';
  * used.
  */
 
+export interface CircuitBreakerOptions {
+  threshold: number,
+  duration: number,
+  minimumRps: number,
+  halfOpenAfter: number,
+  name: string,
+}
+
 /**
  * Creates and holds a circuit breaker policy.
  */
 export class CircuitBreakerPolicy extends MyPolicy {
+  defaultOptions: CircuitBreakerOptions = {
+    threshold: 0.3,
+    duration: 30 * 1000,
+    minimumRps: 5,
+    halfOpenAfter: 30000,
+    name: '',
+  };
+  options: CircuitBreakerOptions;
+  policy: IPolicy<any>;
+  rta: RTAEmitter;
+  listeners: Array<any>;
+  circuitBreaker: IBreaker;
+
   /**
    * @constructor
    * @param {CircuitBreakerOptions} options
    */
   constructor(options) {
     super();
-    this.defaultOptions = {
-      threshold: 0.3,
-      duration: 30 * 1000,
-      minimumRps: 5,
-      halfOpenAfter: 30000,
-      name: '',
-    };
 
     this.options = options;
     this.policy = Policy.noop;
@@ -49,10 +63,10 @@ export class CircuitBreakerPolicy extends MyPolicy {
         .circuitBreaker(halfOpenAfter, this.circuitBreaker);
 
       // TODO: can these listeners generate a memory leak?
-      const onBreakListener = this.policy.onBreak(
+      const onBreakListener = (this.policy as CBPolicy).onBreak(
         () => this.rta.emitCircuitStateChange(name, 'opened'),
       );
-      const onResetListener = this.policy.onReset(
+      const onResetListener = (this.policy as CBPolicy).onReset(
         () => this.rta.emitCircuitStateChange(name, 'closed'),
       );
       this.listeners.push(onBreakListener);
