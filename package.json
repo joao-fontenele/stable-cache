@@ -2,9 +2,10 @@
   "name": "stable-cache",
   "version": "0.0.1",
   "description": "A redis cache library, with producer resilience easily configurable",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
+  "typings": "dist/index",
   "files": [
-    "/lib"
+    "/dist"
   ],
   "repository": {
     "type": "git",
@@ -37,9 +38,12 @@
     "prom-client": "^12.0.0",
     "sinon": "^8.1.1",
     "sinon-chai": "^3.4.0",
-    "standard-version": "^8.0.0"
+    "standard-version": "^8.0.0",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.3"
   },
   "scripts": {
+    "build": "tsc -p .",
     "coverage:unit": "nyc npm run test:unit",
     "coverage:e2e": "nyc --no-clean npm run test:e2e",
     "coverage:report": "nyc report --reporter=lcov --reporter=text",

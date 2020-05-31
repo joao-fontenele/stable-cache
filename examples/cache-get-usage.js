@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 const Redis = require('ioredis');
-const Cache = require('../lib/classes/cache');
+const { Cache } = require('../dist/index');
 
 const redis = new Redis({
   port: 6379,

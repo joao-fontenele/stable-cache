@@ -1,5 +1,5 @@
-const Prometheus = require('prom-client');
-const RTAEmitter = require('./rta-emitter');
+import Prometheus from 'prom-client';
+import { rtaEmitter } from './rta-emitter';
 
 /**
  * @typedef PrometheusRTAExporterOptions
@@ -17,7 +17,7 @@ const RTAEmitter = require('./rta-emitter');
 /**
  * This class is used to export RTA metrics from the cache lib to prometheus.
  */
-class PrometheusRTAExporter {
+export class PrometheusExporter {
   /**
    * @constructor
    * @param {PrometheusRTAExporterOptions} [options={}]
@@ -43,7 +43,7 @@ class PrometheusRTAExporter {
     });
 
     this.listeners = [];
-    this.rta = RTAEmitter.rtaEmitter;
+    this.rta = rtaEmitter;
     this.isCollectingMetrics = false;
   }
 
@@ -197,5 +197,3 @@ class PrometheusRTAExporter {
     this.rta.removeAllListeners();
   }
 }
-
-module.exports = PrometheusRTAExporter;

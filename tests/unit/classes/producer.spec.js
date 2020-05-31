@@ -1,7 +1,7 @@
 const Bluebird = require('bluebird');
-const Producer = require('../../../lib/classes/producer');
+const { Producer } = require('../../../dist/classes/producer');
 const testUtils = require('../../utils');
-const CircuitBreakerPolicy = require('../../../lib/classes/policies/circuit-breaker');
+const { CircuitBreakerPolicy } = require('../../../dist/classes/policies/circuit-breaker');
 
 describe('Producer', function () {
   let sandbox;

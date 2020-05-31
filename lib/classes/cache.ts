@@ -1,6 +1,6 @@
-const Producer = require('./producer');
-const CircuitBreakerPolicy = require('./policies/circuit-breaker');
-const RTAEmitter = require('./rta-emitter');
+import { Producer } from './producer';
+import { CircuitBreakerPolicy } from './policies/circuit-breaker';
+import { rtaEmitter } from './rta-emitter';
 
 /**
  * @typedef {import('./policies/circuit-breaker.js').CircuitBreakerOptions} CircuitBreakerOptions
@@ -72,7 +72,7 @@ const RTAEmitter = require('./rta-emitter');
  * This is because each cache class have it's own circuit breaker. So it makes
  * sense that failures in a service doesn't affect another working service.
  */
-class Cache {
+export class Cache {
   /**
    * @constructor
    * @param {!CacheConfig} config
@@ -80,7 +80,7 @@ class Cache {
   constructor({ redis, options = {} }) {
     this.redis = redis;
     this.options = options;
-    this.rta = RTAEmitter.rtaEmitter;
+    this.rta = rtaEmitter;
 
     if (typeof this.options.circuitBreaker === 'object') {
       this.options.circuitBreaker.name = this.options.name;
@@ -279,5 +279,3 @@ class Cache {
     return value;
   }
 }
-
-module.exports = Cache;

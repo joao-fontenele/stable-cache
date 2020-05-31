@@ -1,5 +1,5 @@
 const Bluebird = require('bluebird');
-const Cache = require('../../../lib/classes/cache');
+const { Cache } = require('../../../dist/classes/cache');
 const testUtils = require('../../utils');
 
 describe('Cache', function () {

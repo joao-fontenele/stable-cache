@@ -1,6 +1,6 @@
-const { Policy, SamplingBreaker } = require('cockatiel');
-const MyPolicy = require('./policy');
-const RTAEmitter = require('../rta-emitter');
+import { Policy, SamplingBreaker } from 'cockatiel';
+import { MyPolicy } from './policy';
+import { rtaEmitter } from '../rta-emitter';
 
 /**
  * @typedef {Object} CircuitBreakerOptions
@@ -20,7 +20,7 @@ const RTAEmitter = require('../rta-emitter');
 /**
  * Creates and holds a circuit breaker policy.
  */
-class CircuitBreaker extends MyPolicy {
+export class CircuitBreakerPolicy extends MyPolicy {
   /**
    * @constructor
    * @param {CircuitBreakerOptions} options
@@ -37,7 +37,7 @@ class CircuitBreaker extends MyPolicy {
 
     this.options = options;
     this.policy = Policy.noop;
-    this.rta = RTAEmitter.rtaEmitter;
+    this.rta = rtaEmitter;
     this.listeners = [];
     this.circuitBreaker = null;
 
@@ -60,5 +60,3 @@ class CircuitBreaker extends MyPolicy {
     }
   }
 }
-
-module.exports = CircuitBreaker;

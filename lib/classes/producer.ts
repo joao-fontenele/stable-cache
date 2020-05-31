@@ -1,8 +1,8 @@
-const { Policy } = require('cockatiel');
-const TimeoutPolicy = require('./policies/timeout');
-const RetryPolicy = require('./policies/retry');
+import { Policy } from 'cockatiel';
+import { TimeoutPolicy } from './policies/timeout';
+import { RetryPolicy } from './policies/retry';
 
-class Producer {
+export class Producer {
   constructor(producer, options = {}) {
     this.options = options;
     this.producer = producer;
@@ -49,5 +49,3 @@ class Producer {
     return policy.execute(this.producer);
   }
 }
-
-module.exports = Producer;

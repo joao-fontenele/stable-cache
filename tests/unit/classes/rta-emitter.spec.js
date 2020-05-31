@@ -1,4 +1,4 @@
-const RTAEmitter = require('../../../lib/classes/rta-emitter');
+const RTAEmitter = require('../../../dist/classes/rta-emitter');
 
 describe('RTAEmitter', function () {
   const { rtaEmitter } = RTAEmitter;

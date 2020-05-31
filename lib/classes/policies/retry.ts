@@ -1,5 +1,5 @@
-const { Policy, decorrelatedJitterGenerator } = require('cockatiel');
-const MyPolicy = require('./policy');
+import { Policy, decorrelatedJitterGenerator } from 'cockatiel';
+import { MyPolicy } from './policy';
 
 /**
  * @typedef {Object} RetryOptions
@@ -20,7 +20,7 @@ const MyPolicy = require('./policy');
 /**
  * Creates and holds a retry policy with exponential backoff
  */
-class Retry extends MyPolicy {
+export class RetryPolicy extends MyPolicy {
   /**
    * @constructor
    * @param {RetryOptions} options
@@ -44,5 +44,3 @@ class Retry extends MyPolicy {
     }
   }
 }
-
-module.exports = Retry;

@@ -2,9 +2,8 @@ const Bluebird = require('bluebird');
 const express = require('express');
 const Prometheus = require('prom-client');
 
-const Cache = require('../lib/classes/cache');
+const { Cache, PrometheusExporter } = require('../dist');
 const Redis = require('./redis');
-const PrometheusExporter = require('../lib/classes/prometheus-exporter');
 
 const app = express();
 

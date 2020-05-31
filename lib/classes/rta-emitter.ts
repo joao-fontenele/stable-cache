@@ -1,7 +1,7 @@
-const { EventEmitter } = require('events');
-const EventTypes = require('../constants/event-types');
+import { EventEmitter } from 'events';
+import { EventTypes } from '../constants/event-types';
 
-class RTAEmitter extends EventEmitter {
+export class RTAEmitter extends EventEmitter {
   emitCircuitStateChange(name, state) {
     return this.emit(
       EventTypes.CIRCUIT_BREAKER_STATE_CHANGE,
@@ -69,6 +69,4 @@ class RTAEmitter extends EventEmitter {
   }
 }
 
-module.exports = {
-  rtaEmitter: new RTAEmitter(),
-};
+export const rtaEmitter = new RTAEmitter();
