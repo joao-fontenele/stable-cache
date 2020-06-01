@@ -21,6 +21,12 @@ export interface PrometheusExporterOptions {
   producerBuckets?: number[],
 }
 
+export interface Metrics {
+  counters: { [index: string]: Prometheus.Counter<string> },
+  histograms: { [index: string]: Prometheus.Histogram<string> },
+  gauges: { [index: string]: Prometheus.Gauge<string> },
+}
+
 /**
  * This class is used to export RTA metrics from the cache lib to prometheus.
  */
@@ -35,9 +41,10 @@ export class PrometheusExporter {
 
   rta: RTAEmitter;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   listeners: any[];
 
-  metrics: any;
+  metrics: Metrics;
 
   isCollectingMetrics: boolean;
 
@@ -82,17 +89,17 @@ export class PrometheusExporter {
     registers,
     cacheBuckets,
     producerBuckets,
-  }) {
-    const metrics: any = {};
+  }): Metrics {
+    const metrics: Metrics = { counters: {}, histograms: {}, gauges: {} };
 
-    metrics.cacheResults = new Prometheus.Counter({
+    metrics.counters.cacheResults = new Prometheus.Counter({
       name: `${prefix}cache_results_count`,
       help: 'Counts the cache hits/misses of a redis get like operation',
       labelNames: ['service', 'operation', 'result'],
       registers,
     });
 
-    metrics.cacheRT = new Prometheus.Histogram({
+    metrics.histograms.cacheRT = new Prometheus.Histogram({
       name: `${prefix}cache_operations_duration_seconds`,
       help: 'Duration of redis operations',
       labelNames: ['service', 'operation'],
@@ -100,14 +107,14 @@ export class PrometheusExporter {
       registers,
     });
 
-    metrics.cacheOperations = new Prometheus.Counter({
+    metrics.counters.cacheOperations = new Prometheus.Counter({
       name: `${prefix}cache_operations_count`,
       help: 'Counts the amount of redis operations',
       labelNames: ['service', 'operation'],
       registers,
     });
 
-    metrics.producerRT = new Prometheus.Histogram({
+    metrics.histograms.producerRT = new Prometheus.Histogram({
       name: `${prefix}producer_operations_duration_seconds`,
       help: 'Duration of producer operations',
       labelNames: ['service'],
@@ -115,14 +122,14 @@ export class PrometheusExporter {
       registers,
     });
 
-    metrics.producerResults = new Prometheus.Counter({
+    metrics.counters.producerResults = new Prometheus.Counter({
       name: `${prefix}producer_operations_result_count`,
       help: 'Counts the outcomes of producer operations',
       labelNames: ['service', 'result'],
       registers,
     });
 
-    metrics.circuitStateChange = new Prometheus.Gauge({
+    metrics.gauges.circuitStateChange = new Prometheus.Gauge({
       name: `${prefix}producer_circuit_break_state`,
       help: 'State of the circuit breaker. CircuitOpen => (Not working === 1). CircuitClosed => (Working OK === 0)',
       labelNames: ['service'],
@@ -135,8 +142,8 @@ export class PrometheusExporter {
   /**
    * @private
    */
-  collectCircuitStateChanges({ name, state }) {
-    this.metrics.circuitStateChange
+  collectCircuitStateChanges({ name, state }): void {
+    this.metrics.gauges.circuitStateChange
       .labels(name)
       .set(state === 'opened' ? 1 : 0);
   }
@@ -144,8 +151,8 @@ export class PrometheusExporter {
   /**
    * @private
    */
-  collectCacheResults({ name, operation, result }) {
-    this.metrics.cacheResults
+  collectCacheResults({ name, operation, result }): void {
+    this.metrics.counters.cacheResults
       .labels(name, operation, result ? 'hit' : 'miss')
       .inc();
   }
@@ -153,8 +160,8 @@ export class PrometheusExporter {
   /**
    * @private
    */
-  collectCacheRT({ name, operation, time }) {
-    this.metrics.cacheRT
+  collectCacheRT({ name, operation, time }): void {
+    this.metrics.histograms.cacheRT
       .labels(name, operation)
       .observe(time / 1000);
   }
@@ -162,8 +169,8 @@ export class PrometheusExporter {
   /**
    * @private
    */
-  collectCacheOperations({ name, operation }) {
-    this.metrics.cacheOperations
+  collectCacheOperations({ name, operation }): void {
+    this.metrics.counters.cacheOperations
       .labels(name, operation)
       .inc();
   }
@@ -171,8 +178,8 @@ export class PrometheusExporter {
   /**
    * @private
    */
-  collectProducerRT({ name, time }) {
-    this.metrics.producerRT
+  collectProducerRT({ name, time }): void {
+    this.metrics.histograms.producerRT
       .labels(name)
       .observe(time / 1000);
   }
@@ -180,8 +187,8 @@ export class PrometheusExporter {
   /**
    * @private
    */
-  collectProducerResults({ name, result }) {
-    this.metrics.producerResults
+  collectProducerResults({ name, result }): void {
+    this.metrics.counters.producerResults
       .labels(name, result ? 'success' : 'failure')
       .inc();
   }
@@ -191,7 +198,7 @@ export class PrometheusExporter {
    *
    * @returns {void}
    */
-  collectMetrics() {
+  collectMetrics(): void {
     if (this.isCollectingMetrics) {
       return;
     }
@@ -211,7 +218,7 @@ export class PrometheusExporter {
    *
    * @returns {void}
    */
-  stopCollectingMetrics() {
+  stopCollectingMetrics(): void {
     if (!this.isCollectingMetrics) {
       return;
     }

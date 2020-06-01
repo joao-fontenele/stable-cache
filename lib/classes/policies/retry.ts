@@ -1,7 +1,7 @@
 import {
-  Policy, decorrelatedJitterGenerator, GeneratorFn, IPolicy,
+  Policy, decorrelatedJitterGenerator, GeneratorFn,
 } from 'cockatiel';
-import { MyPolicy } from './policy';
+import { MyPolicy, PolicyLike } from './policy';
 
 /**
  * @typedef {Object} RetryOptions
@@ -20,19 +20,20 @@ import { MyPolicy } from './policy';
  */
 
 export interface RetryOptions {
-  maxDelay: number | null,
-  maxAttempts: number | null,
-  exponent: number | null,
-  initialDelay: number | null,
-  generator: GeneratorFn<any>,
-  name: string | null,
+  maxDelay?: number | null,
+  maxAttempts?: number | null,
+  exponent?: number | null,
+  initialDelay?: number | null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  generator?: GeneratorFn<any>,
+  name?: string | null,
 }
 
 /**
  * Creates and holds a retry policy with exponential backoff
  */
 export class RetryPolicy extends MyPolicy {
-  policy: IPolicy<any>;
+  policy: PolicyLike;
 
   defaultOptions: RetryOptions;
 
@@ -40,7 +41,7 @@ export class RetryPolicy extends MyPolicy {
    * @constructor
    * @param {RetryOptions} options
    */
-  constructor(options) {
+  constructor(options: RetryOptions) {
     super();
     this.policy = Policy.noop;
 

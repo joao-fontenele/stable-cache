@@ -200,7 +200,7 @@ describe('Cache', function () {
     it('should set the ttl in case ttl option is provided', async function () {
       const response = await cache.set('key', 'value', { ttl: 10000 });
 
-      expect(redis.set.withArgs('key', 'value', 'PX', 10000)).to.have.been.calledOnce;
+      expect(redis.set.withArgs('key', 'value', 'PX', '10000')).to.have.been.calledOnce;
       expect(response).to.be.equal('OK');
     });
   });

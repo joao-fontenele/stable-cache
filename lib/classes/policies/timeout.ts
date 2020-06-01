@@ -1,5 +1,5 @@
-import { Policy, TimeoutStrategy, IPolicy } from 'cockatiel';
-import { MyPolicy } from './policy';
+import { Policy, TimeoutStrategy } from 'cockatiel';
+import { MyPolicy, PolicyLike } from './policy';
 
 /**
  * @typedef {Object} TimeoutOptions
@@ -20,13 +20,13 @@ export interface TimeoutOptions {
 export class TimeoutPolicy extends MyPolicy {
   options: TimeoutOptions;
 
-  policy: IPolicy<any>;
+  policy: PolicyLike;
 
   /**
    * @constructor
    * @param {TimeoutOptions} options
    */
-  constructor(options) {
+  constructor(options: TimeoutOptions) {
     super();
     this.options = options;
     const { timeout } = this.options;

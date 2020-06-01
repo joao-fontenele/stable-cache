@@ -1,6 +1,7 @@
 {
   "extends": [
-    "airbnb-base"
+    "airbnb-base",
+    "plugin:@typescript-eslint/recommended"
   ],
   "plugins": [
     "import",
@@ -44,6 +45,7 @@
     {
       "files": ["examples/**/*.js"],
       "rules": {
+        "@typescript-eslint/no-var-requires": ["off"],
         "import/no-unresolved": ["off"],
         "no-console": ["off"],
         "import/no-extraneous-dependencies": ["off"]

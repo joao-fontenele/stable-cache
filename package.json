@@ -60,7 +60,7 @@
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "mocha --recursive --require ts-node/register --require source-map-support/register --require ./tests/setup.ts ./tests/unit/**/*.spec.ts",
     "test:e2e": "mocha --recursive --require ts-node/register --require source-map-support/register --require ./tests/setup.ts ./tests/e2e/**/*.spec.ts",
-    "lint": "eslint --max-warnings 0 --ext .js,.ts .",
+    "lint": "eslint --max-warnings 0 --ignore-path .gitignore --ext .js,.ts .",
     "release": "standard-version"
   },
   "keywords": [

@@ -1,34 +1,44 @@
-import { Policy, IPolicy } from 'cockatiel';
+import { Policy } from 'cockatiel';
+import { PolicyLike } from './policies/policy';
 import { TimeoutPolicy } from './policies/timeout';
-import { RetryPolicy } from './policies/retry';
+import { RetryPolicy, RetryOptions } from './policies/retry';
+import { CircuitBreakerPolicy } from './policies/circuit-breaker';
 
-export type producer = {
-  (): (Promise<string | null>),
+export interface producerFn {
+  (): Promise<string | null>,
+}
+
+export interface ProducerOptions {
+  name?: string,
+  circuitBreakerPolicy?: CircuitBreakerPolicy,
+  timeout?: number,
+  retry?: RetryOptions,
 }
 
 export class Producer {
-  options: any;
+  options: ProducerOptions;
 
-  producer: producer;
+  producer: producerFn;
 
-  listeners: Array<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  listeners: any[];
 
-  policies: Array<IPolicy<any>>
+  policies: PolicyLike[]
 
-  constructor(producer, options = {}) {
+  constructor(producer: producerFn, options: ProducerOptions = {}) {
     this.options = options;
     this.producer = producer;
     this.listeners = [];
     this.policies = this.getPolicies();
   }
 
-  parseRetryPolicy() {
+  parseRetryPolicy(): PolicyLike {
     const { retry } = this.options;
     const policy = (new RetryPolicy(retry)).getPolicy();
     return policy;
   }
 
-  parseCircuitBreakerPoliciy() {
+  parseCircuitBreakerPoliciy(): PolicyLike {
     const { circuitBreakerPolicy: policy } = this.options;
     if (!policy) {
       return Policy.noop;
@@ -36,13 +46,13 @@ export class Producer {
     return policy.getPolicy();
   }
 
-  parseTimeoutPolicy() {
+  parseTimeoutPolicy(): PolicyLike {
     const { timeout } = this.options;
     const policy = (new TimeoutPolicy({ timeout })).getPolicy();
     return policy;
   }
 
-  getPolicies() {
+  getPolicies(): PolicyLike[] {
     const timeoutPolicy = this.parseTimeoutPolicy();
     const retryPolicy = this.parseRetryPolicy();
     const circuitBreakerPolicy = this.parseCircuitBreakerPoliciy();
@@ -56,7 +66,7 @@ export class Producer {
     return allPolicies;
   }
 
-  execute() {
+  execute(): Promise<string|null> {
     const policy = Policy.wrap(...this.policies);
     return policy.execute(this.producer);
   }

@@ -1,7 +1,7 @@
 import {
-  Policy, SamplingBreaker, IPolicy, IBreaker, CircuitBreakerPolicy as CBPolicy,
+  Policy, SamplingBreaker, IBreaker, CircuitBreakerPolicy as CBPolicy,
 } from 'cockatiel';
-import { MyPolicy } from './policy';
+import { MyPolicy, PolicyLike } from './policy';
 import { rtaEmitter, RTAEmitter } from '../rta-emitter';
 
 /**
@@ -20,11 +20,11 @@ import { rtaEmitter, RTAEmitter } from '../rta-emitter';
  */
 
 export interface CircuitBreakerOptions {
-  threshold: number,
-  duration: number,
-  minimumRps: number,
-  halfOpenAfter: number,
-  name: string,
+  threshold?: number | null,
+  duration?: number | null,
+  minimumRps?: number | null,
+  halfOpenAfter?: number | null,
+  name?: string | null,
 }
 
 /**
@@ -41,10 +41,11 @@ export class CircuitBreakerPolicy extends MyPolicy {
 
   options: CircuitBreakerOptions;
 
-  policy: IPolicy<any>;
+  policy: PolicyLike;
 
   rta: RTAEmitter;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   listeners: Array<any>;
 
   circuitBreaker: IBreaker;
@@ -53,7 +54,7 @@ export class CircuitBreakerPolicy extends MyPolicy {
    * @constructor
    * @param {CircuitBreakerOptions} options
    */
-  constructor(options) {
+  constructor(options: CircuitBreakerOptions) {
     super();
 
     this.options = options;
@@ -64,8 +65,14 @@ export class CircuitBreakerPolicy extends MyPolicy {
 
     if (typeof options === 'object') {
       const configuredOptions = { ...this.defaultOptions, ...options };
-      const { name, halfOpenAfter, ...cbOPtions } = configuredOptions;
-      this.circuitBreaker = new SamplingBreaker(cbOPtions);
+      const {
+        name,
+        halfOpenAfter,
+        threshold,
+        minimumRps,
+        duration,
+      } = configuredOptions;
+      this.circuitBreaker = new SamplingBreaker({ threshold, minimumRps, duration });
       this.policy = Policy.handleAll()
         .circuitBreaker(halfOpenAfter, this.circuitBreaker);
 

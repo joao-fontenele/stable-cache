@@ -6,7 +6,7 @@ import { CircuitBreakerPolicy as CBPolicy, RetryPolicy } from 'cockatiel';
 import { Producer } from '../../../lib/classes/producer';
 import { CircuitBreakerPolicy } from '../../../lib/classes/policies/circuit-breaker';
 
-const testUtils = require('../../utils');
+import * as testUtils from '../../utils';
 
 describe('Producer', function () {
   let sandbox;
@@ -37,7 +37,7 @@ describe('Producer', function () {
 
     it('should return ok if timeout is not reached', async function () {
       const someValue = 'some value';
-      const rawProducer = () => new Promise((resolve) => {
+      const rawProducer = (): Promise<string> => new Promise((resolve) => {
         setTimeout(() => resolve(someValue), 10);
       });
       const producer = new Producer(rawProducer, { timeout: 20 });
@@ -51,7 +51,7 @@ describe('Producer', function () {
 
     it('should throw if timeout is reached', async function () {
       const someValue = 'some value';
-      const rawProducer = () => new Promise((resolve) => {
+      const rawProducer = (): Promise<string> => new Promise((resolve) => {
         setTimeout(() => {
           resolve(someValue);
         }, 20);
@@ -159,7 +159,7 @@ describe('Producer', function () {
       const circuitBreakerPolicy = new CircuitBreakerPolicy({
         threshold: 0.2,
         duration: 30000,
-        openAfter: 30000,
+        halfOpenAfter: 30000,
       });
 
       const producer = new Producer(rawProducer, { circuitBreakerPolicy });
@@ -179,7 +179,7 @@ describe('Producer', function () {
       const circuitBreakerPolicy = new CircuitBreakerPolicy({
         threshold: 0.2,
         duration: 30000,
-        openAfter: 30000,
+        halfOpenAfter: 30000,
       });
 
       const producer = new Producer(rawProducer, { circuitBreakerPolicy });
@@ -194,6 +194,7 @@ describe('Producer', function () {
     it('should resolve if the producer eventually resolves', async function () {
       clock.restore(); // TODO: couldn't use fake timers in this test, fix later
 
+      const someValue = 'hello';
       let delay = 20;
       let calls = 0;
       const rawProducer = async () => {
@@ -204,13 +205,13 @@ describe('Producer', function () {
         }
 
         await Bluebird.delay(delay);
-        return true;
+        return someValue;
       };
 
       const circuitBreakerPolicy = new CircuitBreakerPolicy({
         threshold: 0.2,
         duration: 30000,
-        openAfter: 30000,
+        halfOpenAfter: 30000,
       });
       const producer = new Producer(
         rawProducer,
@@ -223,7 +224,7 @@ describe('Producer', function () {
 
       const result = await producer.execute();
 
-      expect(result).to.be.equal(true);
+      expect(result).to.be.equal(someValue);
       expect(calls).to.be.equal(3);
     });
   });
