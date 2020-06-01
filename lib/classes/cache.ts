@@ -75,12 +75,12 @@ export type producer = {
 }
 
 export type CacheSetOptions = {
-  ttl?: number | null ,
+  ttl?: number | null,
 }
 
 export interface CacheGetOptions {
   producer?: producer | null,
-  ttl?: number | null ,
+  ttl?: number | null,
   returnEarlyFromCache?: boolean | null,
   overrideCache?: boolean | null,
   shouldRefreshKey?: shouldRefreshKey | null,
@@ -107,8 +107,11 @@ export interface CacheConfig {
  */
 export class Cache {
   redis: any;
+
   options: CacheOptions;
+
   rta: RTAEmitter;
+
   circuitBreakerPolicy: CircuitBreakerPolicy;
 
   /**
@@ -151,7 +154,7 @@ export class Cache {
   /**
    * @private
    */
-  // eslint-disable-next-line class-methods-use-this,no-unused-vars
+  // eslint-disable-next-line class-methods-use-this,@typescript-eslint/no-unused-vars
   handleAsyncProducerError(error, key, options) {
   }
 

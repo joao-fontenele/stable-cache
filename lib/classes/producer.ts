@@ -8,8 +8,11 @@ export type producer = {
 
 export class Producer {
   options: any;
+
   producer: producer;
+
   listeners: Array<any>;
+
   policies: Array<IPolicy<any>>
 
   constructor(producer, options = {}) {

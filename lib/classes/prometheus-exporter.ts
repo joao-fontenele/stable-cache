@@ -26,13 +26,21 @@ export interface PrometheusExporterOptions {
  */
 export class PrometheusExporter {
   prefix: string;
+
   registers: Prometheus.Registry[];
+
   cacheBuckets: number[];
+
   producerBuckets: number[];
+
   rta: RTAEmitter;
+
   listeners: any[];
+
   metrics: any;
+
   isCollectingMetrics: boolean;
+
   /**
    * @constructor
    * @param {PrometheusRTAExporterOptions} [options={}]

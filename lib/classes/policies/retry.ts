@@ -1,4 +1,6 @@
-import { Policy, decorrelatedJitterGenerator, GeneratorFn, IPolicy } from 'cockatiel';
+import {
+  Policy, decorrelatedJitterGenerator, GeneratorFn, IPolicy,
+} from 'cockatiel';
 import { MyPolicy } from './policy';
 
 /**
@@ -31,6 +33,7 @@ export interface RetryOptions {
  */
 export class RetryPolicy extends MyPolicy {
   policy: IPolicy<any>;
+
   defaultOptions: RetryOptions;
 
   /**

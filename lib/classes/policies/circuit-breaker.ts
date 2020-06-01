@@ -1,4 +1,6 @@
-import { Policy, SamplingBreaker, IPolicy, IBreaker, CircuitBreakerPolicy as CBPolicy } from 'cockatiel';
+import {
+  Policy, SamplingBreaker, IPolicy, IBreaker, CircuitBreakerPolicy as CBPolicy,
+} from 'cockatiel';
 import { MyPolicy } from './policy';
 import { rtaEmitter, RTAEmitter } from '../rta-emitter';
 
@@ -36,10 +38,15 @@ export class CircuitBreakerPolicy extends MyPolicy {
     halfOpenAfter: 30000,
     name: '',
   };
+
   options: CircuitBreakerOptions;
+
   policy: IPolicy<any>;
+
   rta: RTAEmitter;
+
   listeners: Array<any>;
+
   circuitBreaker: IBreaker;
 
   /**

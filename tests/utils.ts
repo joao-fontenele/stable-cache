@@ -1,6 +1,9 @@
 import { expect } from 'chai';
 
-export async function expectToThrow(promise: Promise<any>, expectedError?: Error): Promise<Error|undefined> {
+export async function expectToThrow(
+  promise: Promise<any>,
+  expectedError?: Error,
+): Promise<Error|undefined> {
   let error: Error | undefined;
 
   try {

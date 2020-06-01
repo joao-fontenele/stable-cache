@@ -19,6 +19,7 @@ export interface TimeoutOptions {
  */
 export class TimeoutPolicy extends MyPolicy {
   options: TimeoutOptions;
+
   policy: IPolicy<any>;
 
   /**
