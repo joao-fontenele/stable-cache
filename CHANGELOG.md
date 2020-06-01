@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/joao-fontenele/stable-cache/compare/v0.0.1...v0.1.0) (2020-06-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* exporting classes Cache, PrometheusExporter, Producer, and
+  RTAEmitter as properties of their modules
+
+### Features
+
+* make this a typescript project ([bea5526](https://github.com/joao-fontenele/stable-cache/commit/bea55262dfc37f022265e513f592af896fb429fa))
+
 ### [0.0.1](https://github.com/joao-fontenele/stable-cache/compare/v0.0.0...v0.0.1) (2020-05-18)
 
 ## 0.0.0 (2020-05-17)
