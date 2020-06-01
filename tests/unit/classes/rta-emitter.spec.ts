@@ -1,4 +1,7 @@
-const RTAEmitter = require('../../../lib/classes/rta-emitter');
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+
+import * as RTAEmitter from '../../../lib/classes/rta-emitter';
 
 describe('RTAEmitter', function () {
   const { rtaEmitter } = RTAEmitter;
@@ -33,13 +36,13 @@ describe('RTAEmitter', function () {
 
         expect(name).to.be.equal('name');
         expect(operation).to.be.equal('get');
-        expect(result).to.be.equal('success');
+        expect(result).to.be.equal(true);
 
         done();
       });
       rtaEmitter.onCacheResult(callback);
 
-      rtaEmitter.emitCacheResult('name', 'get', 'success');
+      rtaEmitter.emitCacheResult('name', 'get', true);
     });
 
     it('should have methods to handle cache RT events', function (done) {
@@ -90,13 +93,13 @@ describe('RTAEmitter', function () {
         expect(callback).to.have.been.calledOnce;
 
         expect(name).to.be.equal('name');
-        expect(result).to.be.equal('success');
+        expect(result).to.be.equal(true);
 
         done();
       });
       rtaEmitter.onProducerResult(callback);
 
-      rtaEmitter.emitProducerResult('name', 'success');
+      rtaEmitter.emitProducerResult('name', true);
     });
   });
 });

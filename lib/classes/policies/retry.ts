@@ -1,5 +1,7 @@
-const { Policy, decorrelatedJitterGenerator } = require('cockatiel');
-const MyPolicy = require('./policy');
+import {
+  Policy, decorrelatedJitterGenerator, GeneratorFn,
+} from 'cockatiel';
+import { MyPolicy, PolicyLike } from './policy';
 
 /**
  * @typedef {Object} RetryOptions
@@ -17,15 +19,29 @@ const MyPolicy = require('./policy');
  * policy.
  */
 
+export interface RetryOptions {
+  maxDelay?: number | null,
+  maxAttempts?: number | null,
+  exponent?: number | null,
+  initialDelay?: number | null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  generator?: GeneratorFn<any>,
+  name?: string | null,
+}
+
 /**
  * Creates and holds a retry policy with exponential backoff
  */
-class Retry extends MyPolicy {
+export class RetryPolicy extends MyPolicy {
+  policy: PolicyLike;
+
+  defaultOptions: RetryOptions;
+
   /**
    * @constructor
    * @param {RetryOptions} options
    */
-  constructor(options) {
+  constructor(options: RetryOptions) {
     super();
     this.policy = Policy.noop;
 
@@ -44,5 +60,3 @@ class Retry extends MyPolicy {
     }
   }
 }
-
-module.exports = Retry;

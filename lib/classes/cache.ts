@@ -1,6 +1,7 @@
-const Producer = require('./producer');
-const CircuitBreakerPolicy = require('./policies/circuit-breaker');
-const RTAEmitter = require('./rta-emitter');
+import { Producer, producerFn, ProducerOptions } from './producer';
+import { CircuitBreakerPolicy, CircuitBreakerOptions } from './policies/circuit-breaker';
+import { RetryOptions } from './policies/retry';
+import { rtaEmitter, RTAEmitter } from './rta-emitter';
 
 /**
  * @typedef {import('./policies/circuit-breaker.js').CircuitBreakerOptions} CircuitBreakerOptions
@@ -65,6 +66,35 @@ const RTAEmitter = require('./rta-emitter');
  * Defaults to never perform retries.
  */
 
+export interface shouldRefreshKey {
+  (string: string, number: number, options: CacheGetOptions): boolean,
+}
+
+export interface CacheSetOptions {
+  ttl?: number | null,
+}
+
+export interface CacheGetOptions {
+  producer?: producerFn | null,
+  ttl?: number | null,
+  returnEarlyFromCache?: boolean | null,
+  overrideCache?: boolean | null,
+  shouldRefreshKey?: shouldRefreshKey | null,
+  producerTimeout?: number | null,
+  producerRetry?: RetryOptions,
+}
+
+export interface CacheOptions {
+  name?: string | null | undefined,
+  circuitBreaker?: CircuitBreakerOptions | undefined | null,
+}
+
+export interface CacheConfig {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  redis: any,
+  options?: CacheOptions
+}
+
 /**
  * This is the main class to be used for interfacing producer with a redis cache.
  *
@@ -72,15 +102,24 @@ const RTAEmitter = require('./rta-emitter');
  * This is because each cache class have it's own circuit breaker. So it makes
  * sense that failures in a service doesn't affect another working service.
  */
-class Cache {
+export class Cache {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  redis: any;
+
+  options: CacheOptions;
+
+  rta: RTAEmitter;
+
+  circuitBreakerPolicy: CircuitBreakerPolicy;
+
   /**
    * @constructor
    * @param {!CacheConfig} config
    */
-  constructor({ redis, options = {} }) {
+  constructor({ redis, options = {} }: CacheConfig) {
     this.redis = redis;
     this.options = options;
-    this.rta = RTAEmitter.rtaEmitter;
+    this.rta = rtaEmitter;
 
     if (typeof this.options.circuitBreaker === 'object') {
       this.options.circuitBreaker.name = this.options.name;
@@ -91,7 +130,7 @@ class Cache {
   /**
    * @private
    */
-  static calculateElapsedMilliseconds(start) {
+  static calculateElapsedMilliseconds(start: [number, number]): number {
     const end = process.hrtime(start);
     const elapsedTime = end[0] * 1000 + end[1] / 1e6;
     return elapsedTime;
@@ -102,7 +141,7 @@ class Cache {
    * @param {!string} key
    * @param {Object} options
    */
-  async produceAndSet(key, options) {
+  async produceAndSet(key: string, options: CacheGetOptions): Promise<string> {
     const value = await this.rawProduce(options);
     await this.set(key, value, options);
     return value;
@@ -113,14 +152,15 @@ class Cache {
   /**
    * @private
    */
-  // eslint-disable-next-line class-methods-use-this,no-unused-vars
-  handleAsyncProducerError(error, key, options) {
+  /* eslint-disable */
+  handleAsyncProducerError(error: Error, key: string, options: CacheGetOptions): void {
+    /* eslint-enable */
   }
 
   /**
    * @private
    */
-  getProducerOptions(options) {
+  getProducerOptions(options: CacheGetOptions): ProducerOptions {
     const producerOptions = {
       name: this.options.name,
       circuitBreakerPolicy: this.circuitBreakerPolicy,
@@ -134,7 +174,7 @@ class Cache {
   /**
    * @private
    */
-  produce(key, options) {
+  produce(key: string, options: CacheGetOptions): Promise<string> {
     const producerOptions = this.getProducerOptions(options);
     const producer = new Producer(
       () => this.produceAndSet(key, options),
@@ -154,7 +194,7 @@ class Cache {
    * cache hit, and possible producer call. Or `null` depending on configured
    * call.
    */
-  async get(key, options = {}) {
+  async get(key: string, options: CacheGetOptions = {}): Promise<string|null> {
     const {
       producer,
       returnEarlyFromCache,
@@ -193,12 +233,12 @@ class Cache {
    * before expiring. Defaults to never set ttl.
    * @returns {Promise<string>} - returns string `OK` if successful.
    */
-  async set(key, value, options = {}) {
+  async set(key: string, value: string, options: CacheSetOptions = {}): Promise<string|null> {
     const { ttl } = options;
     const args = [key, value];
 
     if (ttl) {
-      args.push('PX', ttl);
+      args.push('PX', `${ttl}`);
     }
 
     return this.rawSet(...args);
@@ -207,7 +247,7 @@ class Cache {
   /**
    * @private
    */
-  async rawGet(key) {
+  async rawGet(key: string): Promise<string> {
     const start = process.hrtime();
     const { name } = this.options;
 
@@ -228,7 +268,7 @@ class Cache {
   /**
    * @private
    */
-  async rawSet(...args) {
+  async rawSet(...args): Promise<string|null> {
     const start = process.hrtime();
     const { name } = this.options;
 
@@ -247,7 +287,7 @@ class Cache {
   /**
    * @private
    */
-  async rawPTTL(key) {
+  async rawPTTL(key: string): Promise<number|null> {
     const { name } = this.options;
 
     let result;
@@ -262,12 +302,12 @@ class Cache {
   /**
    * @private
    */
-  async rawProduce(options) {
+  async rawProduce(options: CacheGetOptions): Promise<string|null> {
     const start = process.hrtime();
     const { name } = this.options;
     const { producer } = options;
 
-    let value;
+    let value: string | undefined;
     try {
       value = await producer();
     } finally {
@@ -279,5 +319,3 @@ class Cache {
     return value;
   }
 }
-
-module.exports = Cache;

@@ -1,6 +1,10 @@
-const Bluebird = require('bluebird');
-const Cache = require('../../../lib/classes/cache');
-const testUtils = require('../../utils');
+import { expect } from 'chai';
+import * as sinon from 'sinon';
+
+import * as Bluebird from 'bluebird';
+import { Cache } from '../../../lib/classes/cache';
+
+import * as testUtils from '../../utils';
 
 describe('Cache', function () {
   const serviceName = 'someService';
@@ -196,7 +200,7 @@ describe('Cache', function () {
     it('should set the ttl in case ttl option is provided', async function () {
       const response = await cache.set('key', 'value', { ttl: 10000 });
 
-      expect(redis.set.withArgs('key', 'value', 'PX', 10000)).to.have.been.calledOnce;
+      expect(redis.set.withArgs('key', 'value', 'PX', '10000')).to.have.been.calledOnce;
       expect(response).to.be.equal('OK');
     });
   });

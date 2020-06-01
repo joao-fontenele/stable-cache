@@ -2,9 +2,10 @@
   "name": "stable-cache",
   "version": "0.0.1",
   "description": "A redis cache library, with producer resilience easily configurable",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
+  "typings": "dist/index",
   "files": [
-    "/lib"
+    "/dist"
   ],
   "repository": {
     "type": "git",
@@ -23,7 +24,15 @@
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
+    "@istanbuljs/nyc-config-typescript": "^1.0.1",
     "@ls-age/commitlint-circle": "^1.0.0",
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^14.0.6",
+    "@types/sinon": "^9.0.4",
+    "@types/sinon-chai": "^3.2.4",
+    "@typescript-eslint/eslint-plugin": "^3.0.2",
+    "@typescript-eslint/parser": "^3.0.2",
     "bluebird": "^3.7.2",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
@@ -37,17 +46,21 @@
     "prom-client": "^12.0.0",
     "sinon": "^8.1.1",
     "sinon-chai": "^3.4.0",
-    "standard-version": "^8.0.0"
+    "source-map-support": "^0.5.19",
+    "standard-version": "^8.0.0",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.3"
   },
   "scripts": {
+    "build": "tsc -p .",
     "coverage:unit": "nyc npm run test:unit",
     "coverage:e2e": "nyc --no-clean npm run test:e2e",
     "coverage:report": "nyc report --reporter=lcov --reporter=text",
     "coverage": "npm run coverage:unit && npm run coverage:e2e && npm run coverage:report && tar -czvf coverage.tar.gz coverage",
     "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "mocha --recursive --require ./tests/setup.js ./tests/unit",
-    "test:e2e": "mocha --recursive --require ./tests/setup.js ./tests/e2e",
-    "lint": "eslint --max-warnings 0 .",
+    "test:unit": "mocha --recursive --require ts-node/register --require source-map-support/register --require ./tests/setup.ts ./tests/unit/**/*.spec.ts",
+    "test:e2e": "mocha --recursive --require ts-node/register --require source-map-support/register --require ./tests/setup.ts ./tests/e2e/**/*.spec.ts",
+    "lint": "eslint --max-warnings 0 --ignore-path .gitignore --ext .js,.ts .",
     "release": "standard-version"
   },
   "keywords": [

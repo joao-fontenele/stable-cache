@@ -1,5 +1,5 @@
-const { Policy, TimeoutStrategy } = require('cockatiel');
-const MyPolicy = require('./policy');
+import { Policy, TimeoutStrategy } from 'cockatiel';
+import { MyPolicy, PolicyLike } from './policy';
 
 /**
  * @typedef {Object} TimeoutOptions
@@ -9,15 +9,24 @@ const MyPolicy = require('./policy');
  * policy.
  */
 
+export interface TimeoutOptions {
+  timeout?: number,
+  name?: string,
+}
+
 /**
  * Creates and holds a retry policy with exponential backoff
  */
-class TimeoutPolicy extends MyPolicy {
+export class TimeoutPolicy extends MyPolicy {
+  options: TimeoutOptions;
+
+  policy: PolicyLike;
+
   /**
    * @constructor
    * @param {TimeoutOptions} options
    */
-  constructor(options) {
+  constructor(options: TimeoutOptions) {
     super();
     this.options = options;
     const { timeout } = this.options;
@@ -28,5 +37,3 @@ class TimeoutPolicy extends MyPolicy {
     }
   }
 }
-
-module.exports = TimeoutPolicy;
