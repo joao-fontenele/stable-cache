@@ -52,6 +52,9 @@ const cache = new Cache({
       duration: 10000,
       // attempt to half open the circuit after this time in milliseconds
       halfOpenAfter: 20000,
+      // don't open the circuit if there's less than this amount of RPS.
+      // This avoids opening the circuit, during failures in low load periods.
+      minimumRps: 5,
     },
   },
 });
